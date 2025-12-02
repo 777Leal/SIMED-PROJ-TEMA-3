@@ -1,13 +1,13 @@
 # Sistema de Consultas Médicas - CIMED
 
 ## Overview
-This is a Django-based medical consultation system that allows patients to schedule appointments with doctors, manage medical records, and handle medication information. The system includes Google OAuth authentication via django-allauth.
+This is a Django-based medical consultation system that allows patients to schedule appointments with doctors, manage medical records, and handle medication information. The system includes Google OAuth authentication via django-allauth, individual professional pages organized by specialty, and smooth login/registration transitions.
 
 ## Project Type
 - **Framework**: Django 5.2.6
 - **Language**: Python 3.11
 - **Database**: SQLite (development) / PostgreSQL (production)
-- **Frontend**: HTML, CSS, JavaScript
+- **Frontend**: HTML, CSS, JavaScript with CSS animations
 - **Authentication**: Django Auth + Google OAuth (django-allauth)
 
 ## Recent Changes (December 2, 2025)
@@ -23,6 +23,11 @@ This is a Django-based medical consultation system that allows patients to sched
 - ✅ Added whitenoise for static file serving in production
 - ✅ Configured deployment with gunicorn and collectstatic build step
 - ✅ Added production-only security settings (CSRF_COOKIE_SECURE, SESSION_COOKIE_SECURE)
+- ✅ Created Especialidade and Profissional models for individual professional pages
+- ✅ Implemented professional listing, individual detail pages, and specialty filtering
+- ✅ Added CSS transitions and animations to login/registration pages
+- ✅ Created database initialization script (scripts/init_db.py)
+- ✅ Added success messages with Django messages framework for smooth transitions
 
 ## Project Architecture
 
@@ -38,17 +43,22 @@ This is a Django-based medical consultation system that allows patients to sched
    - Dashboard views for different user types
 
 ### Models
-- **Perfil**: Extended user profile with type (medico/paciente/atendente), birth date, RG, address
-- **Consulta**: Appointment scheduling with status tracking and medical reports
-- **Medicamento**: Medication catalog with photos, prices, and prescription requirements
+- **Perfil**: Extended user profile with type (medico/paciente/atendente), birth date, RG, address, phone
+- **Consulta**: Appointment scheduling with status tracking, medical reports, and professional assignment
+- **Medicamento**: Medication catalog with photos, prices, stock, and prescription requirements
+- **Especialidade**: Medical specialties with name, icon, and description
+- **Profissional**: Healthcare professionals with specialty, credentials, bio, certifications, and photos
 
 ### Key Features
 - User authentication (traditional + Google OAuth)
 - Role-based access control (doctors, patients, attendants)
 - Appointment scheduling with 15-minute time slots (8 AM - 6 PM)
 - Medical report writing
-- Medication management
+- Medication management with stock control
 - Multiple specialized services (surgery, exams, dentistry, ophthalmology, tomography)
+- Individual professional pages organized by specialty
+- Smooth login/registration transitions with CSS animations
+- Success messages for user feedback
 
 ## Database Configuration
 
@@ -108,11 +118,24 @@ Access at: `/admin/`
 
 ## URLs Structure
 - `/` - Home page
-- `/login/` - Login page
-- `/cadastro/` - User registration
+- `/login/` - Login page with CSS animations
+- `/cadastrar_usuario/` - User registration with CSS animations
+- `/profissionais/` - List all healthcare professionals
+- `/profissional/<slug>/` - Individual professional page
+- `/especialidade/<id>/` - Professionals filtered by specialty
 - `/painel/` - User dashboard (redirects based on user type)
 - `/admin/` - Django admin panel
 - `/accounts/` - django-allauth authentication URLs
+
+## Database Initialization
+Run the initialization script to populate sample data:
+```bash
+python scripts/init_db.py
+```
+This creates:
+- 10 medical specialties
+- 6 sample healthcare professionals
+- 5 sample medications
 
 ## Static Files
 Static files are served from `pessoas/static/`:

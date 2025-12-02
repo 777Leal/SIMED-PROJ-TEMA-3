@@ -1,50 +1,114 @@
 # pessoas/models.py
 
 from django.db import models
-from django.contrib.auth.models import User # Importa o modelo de usuário padrão do Django
+from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 
-# Modelo para estender o User padrão com o tipo de perfil (Médico ou Paciente)
+
 class Perfil(models.Model):
+    """
+    Modelo para estender o User padrão com o tipo de perfil (Médico, Paciente ou Atendente)
+    """
     TIPOS_USUARIO = (
         ('medico', 'Médico'),
         ('paciente', 'Paciente'),
-        ("atendente", "Atendente"),
+        ('atendente', 'Atendente'),
     )
-    # Relação um-para-um: cada usuário terá um, e apenas um, perfil.
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
     tipo_usuario = models.CharField(max_length=10, choices=TIPOS_USUARIO)
     data_nascimento = models.DateField(null=True, blank=True)
     rg = models.CharField(max_length=20, null=True, blank=True)
     endereco = models.CharField(max_length=255, null=True, blank=True)
+    telefone = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
         return f'{self.usuario.username} - {self.get_tipo_usuario_display()}'
 
-# Modelo para armazenar as consultas
+    class Meta:
+        verbose_name = 'Perfil'
+        verbose_name_plural = 'Perfis'
+
+
+class Especialidade(models.Model):
+    """
+    Modelo para categorias de especialidades médicas
+    """
+    nome = models.CharField(max_length=100, unique=True)
+    descricao = models.TextField(blank=True, null=True)
+    icone = models.CharField(max_length=50, default='fa-stethoscope', help_text='Classe do ícone FontAwesome')
+
+    def __str__(self):
+        return self.nome
+
+    class Meta:
+        verbose_name = 'Especialidade'
+        verbose_name_plural = 'Especialidades'
+        ordering = ['nome']
+
+
+class Profissional(models.Model):
+    """
+    Modelo para profissionais de saúde com informações detalhadas
+    """
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    nome = models.CharField(max_length=200)
+    especialidade = models.ForeignKey(Especialidade, on_delete=models.SET_NULL, null=True, blank=True)
+    crm = models.CharField(max_length=20, blank=True, null=True, verbose_name='CRM/CRO')
+    foto = models.ImageField(upload_to='profissionais/', blank=True, null=True)
+    biografia = models.TextField(blank=True, null=True, help_text='Descrição do profissional')
+    formacao = models.TextField(blank=True, null=True, help_text='Formação acadêmica')
+    certificacoes = models.TextField(blank=True, null=True, help_text='Certificações e especializações')
+    objetivos = models.TextField(blank=True, null=True, help_text='Objetivos e filosofia de trabalho')
+    telefone = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    ativo = models.BooleanField(default=True)
+    destaque = models.BooleanField(default=False, help_text='Mostrar na página principal')
+    slug = models.SlugField(unique=True, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            from django.utils.text import slugify
+            self.slug = slugify(self.nome)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        especialidade_nome = self.especialidade.nome if self.especialidade else 'Sem especialidade'
+        return f'{self.nome} - {especialidade_nome}'
+
+    class Meta:
+        verbose_name = 'Profissional'
+        verbose_name_plural = 'Profissionais'
+        ordering = ['nome']
+
+
 class Consulta(models.Model):
+    """
+    Modelo para armazenar as consultas agendadas
+    """
     STATUS_CHOICES = (
         ('agendada', 'Agendada'),
+        ('confirmada', 'Confirmada'),
         ('concluida', 'Concluída'),
         ('cancelada', 'Cancelada'),
     )
     paciente = models.ForeignKey(User, on_delete=models.CASCADE, related_name='consultas_como_paciente')
     medico = models.ForeignKey(User, on_delete=models.CASCADE, related_name='consultas_como_medico')
+    profissional = models.ForeignKey(Profissional, on_delete=models.SET_NULL, null=True, blank=True)
     data_hora = models.DateTimeField()
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='agendada')
-    relatorio = models.TextField(blank=True, null=True, help_text="Relatório a ser preenchido pelo médico após a consulta.")
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='agendada')
+    relatorio = models.TextField(blank=True, null=True, help_text='Relatório a ser preenchido pelo médico após a consulta.')
+    observacoes = models.TextField(blank=True, null=True, help_text='Observações do paciente')
     criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f'Consulta de {self.paciente.username} com Dr(a). {self.medico.last_name} em {self.data_hora.strftime("%d/%m/%Y %H:%M")}'
 
     class Meta:
         ordering = ['-data_hora']
+        verbose_name = 'Consulta'
+        verbose_name_plural = 'Consultas'
 
-        # pessoas/models.py
-
-from django.db import models
-from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator # Importe o validator
 
 class Medicamento(models.Model):
     """
@@ -53,27 +117,32 @@ class Medicamento(models.Model):
     nome = models.CharField(
         max_length=200, 
         unique=True, 
-        help_text="Nome comercial do medicamento."
+        help_text='Nome comercial do medicamento.'
     )
+    principio_ativo = models.CharField(max_length=200, blank=True, null=True)
     foto = models.ImageField(
         upload_to='medicamentos/', 
         blank=True, 
         null=True, 
-        help_text="Foto da embalagem do medicamento."
+        help_text='Foto da embalagem do medicamento.'
     )
     valor = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 
         validators=[MinValueValidator(0.01)],
-        help_text="Preço do medicamento em R$."
+        help_text='Preço do medicamento em R$.'
     )
     necessita_receita = models.BooleanField(
         default=True, 
-        help_text="Marque esta opção se o medicamento exige receita médica."
+        help_text='Marque esta opção se o medicamento exige receita médica.'
     )
+    descricao = models.TextField(blank=True, null=True)
+    estoque = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.nome
 
     class Meta:
-        ordering = ['nome'] # Ordena os medicamentos por nome em ordem alfabética
+        ordering = ['nome']
+        verbose_name = 'Medicamento'
+        verbose_name_plural = 'Medicamentos'

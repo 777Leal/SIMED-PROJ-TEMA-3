@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .forms import (
     CadastroUsuarioForm, PerfilForm, AgendarConsultaForm, 
     RelatorioConsultaForm, AgendarConsultaAtendenteForm, 
     MedicamentoForm, LoginUsuarioForm
 )
-from .models import User, Perfil, Consulta, Medicamento
+from .models import User, Perfil, Consulta, Medicamento, Profissional, Especialidade
 from django.utils import timezone
 from datetime import timedelta, time, datetime
 from django.db.models import Q
@@ -118,7 +119,32 @@ def politicas_de_uso(request):
     return render(request, 'pessoas/politicas-de-uso.html')
 
 def profissionais(request):
-    return render(request,'pessoas/profissionais.html')
+    """Lista todos os profissionais ativos"""
+    profissionais_lista = Profissional.objects.filter(ativo=True).select_related('especialidade')
+    especialidades = Especialidade.objects.all()
+    return render(request, 'pessoas/profissionais.html', {
+        'profissionais': profissionais_lista,
+        'especialidades': especialidades
+    })
+
+def profissional_detalhe(request, slug):
+    """Página individual do profissional"""
+    profissional = get_object_or_404(Profissional, slug=slug, ativo=True)
+    return render(request, 'pessoas/profissional_detalhe.html', {
+        'profissional': profissional
+    })
+
+def profissionais_por_especialidade(request, especialidade_id):
+    """Lista profissionais de uma especialidade específica"""
+    especialidade = get_object_or_404(Especialidade, pk=especialidade_id)
+    profissionais_lista = Profissional.objects.filter(
+        especialidade=especialidade, 
+        ativo=True
+    )
+    return render(request, 'pessoas/profissionais_especialidade.html', {
+        'especialidade': especialidade,
+        'profissionais': profissionais_lista
+    })
 
 def privacidade(request):
     return render(request,'pessoas/privacidade.html')
@@ -131,15 +157,16 @@ def login_view(request):
         if form.is_valid():
             user = form.cleaned_data['user']
             login(request, user)
+            messages.success(request, f'Bem-vindo(a) de volta, {user.first_name or user.username}!')
 
             # Redirecionamento baseado no tipo de usuário
             if user.is_staff:
-                return redirect('dashboard_consultas')   # ADMIN → Dashboard Admin
+                return redirect('dashboard_consultas')
             elif hasattr(user, 'perfil'):
                 if user.perfil.tipo_usuario == 'medico':
-                    return redirect('dashboard')
+                    return redirect('painel_medico')
                 elif user.perfil.tipo_usuario == 'paciente':
-                    return redirect('home')
+                    return redirect('painel_paciente')
                 elif user.perfil.tipo_usuario == 'atendente':
                     return redirect('painel_atendente')
 
@@ -157,7 +184,10 @@ def cadastrar_usuario(request):
             user.set_password(form.cleaned_data['password'])
             user.save()
             Perfil.objects.get_or_create(usuario=user, defaults={'tipo_usuario': 'paciente'})
+            messages.success(request, 'Cadastro realizado com sucesso! Faça login para continuar.')
             return redirect('login')
+        else:
+            messages.error(request, 'Por favor, corrija os erros abaixo.')
     else:
         form = CadastroUsuarioForm()
 
@@ -171,10 +201,12 @@ def logout_view(request):
 
 def excluir_medicamento(request, medicamento_id):
     medicamento = get_object_or_404(Medicamento, pk=medicamento_id)
-    # if request.method == 'POST':
-    #     medicamento.delete()
-    #     return redirect('lista_medicamentos')
-    # return redirect('lista_medicamentos')
+    if request.method == 'POST':
+        nome = medicamento.nome
+        medicamento.delete()
+        messages.success(request, f'Medicamento "{nome}" excluído com sucesso.')
+        return redirect('dashboard_produtos')
+    return redirect('dashboard_produtos')
 
 def cadastrar_medicamento(request):
     if request.method == 'POST':

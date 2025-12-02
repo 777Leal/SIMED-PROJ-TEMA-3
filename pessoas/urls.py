@@ -27,6 +27,8 @@ urlpatterns = [
     path('checkup_tratamento/', views.checkup_tratamento, name='checkup_tratamento'),
     path('politicas-de-uso/', views.politicas_de_uso, name='politicas-de-uso'),
     path('profissionais/', views.profissionais, name='profissionais'),
+    path('profissional/<slug:slug>/', views.profissional_detalhe, name='profissional_detalhe'),
+    path('especialidade/<int:especialidade_id>/', views.profissionais_por_especialidade, name='profissionais_especialidade'),
     path('privacidade/', views.privacidade, name='privacidade'),
 
     # URLs de Autenticação
