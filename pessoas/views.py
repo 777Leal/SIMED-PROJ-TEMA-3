@@ -9,6 +9,10 @@ from .forms import (
     MedicamentoForm, LoginUsuarioForm
 )
 from .models import User, Perfil, Consulta, Medicamento, Profissional, Especialidade
+from .decorators import (
+    admin_required, medico_required, atendente_required, paciente_required,
+    role_required, min_role_required, get_user_role
+)
 from django.utils import timezone
 from datetime import timedelta, time, datetime
 from django.db.models import Q
@@ -246,14 +250,22 @@ def painel(request):
     except Perfil.DoesNotExist:
         return redirect('login')
         
-@login_required
+@medico_required
 def painel_medico(request):
-    consultas = Consulta.objects.filter(medico=request.user).order_by('data_hora')
+    user_role = get_user_role(request.user)
+    if user_role == 'admin':
+        consultas = Consulta.objects.all().order_by('data_hora')
+    else:
+        consultas = Consulta.objects.filter(medico=request.user).order_by('data_hora')
     return render(request, 'pessoas/painel_medico.html', {'consultas': consultas})
 
-@login_required
+@paciente_required
 def painel_paciente(request):
-    consultas = Consulta.objects.filter(paciente=request.user).order_by('data_hora')
+    user_role = get_user_role(request.user)
+    if user_role == 'admin':
+        consultas = Consulta.objects.all().order_by('data_hora')
+    else:
+        consultas = Consulta.objects.filter(paciente=request.user).order_by('data_hora')
 
     if request.method == 'POST':
         form = AgendarConsultaForm(request.POST)
@@ -279,11 +291,8 @@ def checkup_consulta(request):
 def checkup_tratamento(request):
     return render(request, 'pessoas/checkup_tratamento.html')
     
-@login_required
+@atendente_required
 def painel_atendente(request):
-    if request.user.perfil.tipo_usuario != "atendente":
-        return redirect("painel")
-
     consultas = Consulta.objects.all().order_by("data_hora")
 
     if request.method == "POST":
@@ -292,6 +301,7 @@ def painel_atendente(request):
             nova_consulta = form.save(commit=False)
             nova_consulta.data_hora = form.cleaned_data.get('data_hora')
             nova_consulta.save()
+            messages.success(request, 'Consulta agendada com sucesso!')
             return redirect("painel_atendente")
     else:
         form = AgendarConsultaAtendenteForm()
@@ -305,15 +315,20 @@ def painel_atendente(request):
 
 # --- AÇÕES ESPECÍFICAS ---
 
-@login_required
+@medico_required
 def escrever_relatorio(request, consulta_id):
-    consulta = get_object_or_404(Consulta, id=consulta_id, medico=request.user)
+    user_role = get_user_role(request.user)
+    if user_role == 'admin':
+        consulta = get_object_or_404(Consulta, id=consulta_id)
+    else:
+        consulta = get_object_or_404(Consulta, id=consulta_id, medico=request.user)
 
     if request.method == 'POST':
         form = RelatorioConsultaForm(request.POST, instance=consulta)
         if form.is_valid():
             consulta.status = 'concluida'
             form.save()
+            messages.success(request, 'Relatório salvo com sucesso!')
             return redirect('painel_medico')
     else:
         form = RelatorioConsultaForm(instance=consulta)
@@ -322,27 +337,18 @@ def escrever_relatorio(request, consulta_id):
 
 # --- DASHBOARD ADMINISTRATIVO ---
 
-@login_required
+@admin_required
 def dashboard_admin(request):
-    if not request.user.is_staff:
-        return redirect('painel')
-    
     return redirect('dashboard_consultas')
 
-@login_required
+@admin_required
 def dashboard_produtos(request):
-    if not request.user.is_staff:
-        return redirect('painel')
-    
     medicamentos = Medicamento.objects.all().order_by('nome')
     return render(request, 'pessoas/dashboard_produtos.html', {'medicamentos': medicamentos})
 
-@login_required
+@admin_required
 def dashboard_consultas(request):
-    if not request.user.is_staff:
-        return redirect('painel')
-    
-    from django.db.models import Count, Q
+    from django.db.models import Count
     from datetime import date
     
     total_consultas = Consulta.objects.count()
@@ -377,31 +383,22 @@ def dashboard_consultas(request):
     
     return render(request, 'pessoas/dashboard_consultas.html', contexto)
 
-@login_required
+@admin_required
 def dashboard_ocupacao(request):
-    if not request.user.is_staff:
-        return redirect('painel')
-    
     consultas = Consulta.objects.filter(status='agendada').order_by('data_hora')
     return render(request, 'pessoas/dashboard_ocupacao.html', {'consultas': consultas})
 
-@login_required
+@admin_required
 def dashboard_pacientes(request):
-    if not request.user.is_staff:
-        return redirect('painel')
-    
     pacientes = User.objects.filter(perfil__tipo_usuario='paciente').order_by('first_name')
     return render(request, 'pessoas/dashboard_pacientes.html', {'pacientes': pacientes})
 
-@login_required
+@admin_required
 def dashboard_medicos(request):
-    if not request.user.is_staff:
-        return redirect('painel')
-    
     medicos = User.objects.filter(perfil__tipo_usuario='medico').order_by('first_name')
     return render(request, 'pessoas/dashboard_medicos.html', {'medicos': medicos})
 
-@login_required
+@admin_required
 def editar_medicamento(request, medicamento_id):
     medicamento = get_object_or_404(Medicamento, pk=medicamento_id)
     if request.method == 'POST':
@@ -413,44 +410,49 @@ def editar_medicamento(request, medicamento_id):
         form = MedicamentoForm(instance=medicamento)
     return render(request, 'pessoas/editar_medicamento.html', {'form': form})
 
-@login_required
+@admin_required
 def cancelar_consulta_admin(request, consulta_id):
-    if not request.user.is_staff:
-        return redirect('painel')
     consulta = get_object_or_404(Consulta, pk=consulta_id)
     consulta.status = 'cancelada'
     consulta.save()
+    messages.success(request, 'Consulta cancelada com sucesso.')
     return redirect('dashboard_ocupacao')
 
-@login_required
+@admin_required
 def remover_medico(request, medico_id):
-    if not request.user.is_staff:
-        return redirect('painel')
     medico = get_object_or_404(User, pk=medico_id, perfil__tipo_usuario='medico')
+    nome = f"{medico.first_name} {medico.last_name}"
     medico.delete()
+    messages.success(request, f'Médico {nome} removido com sucesso.')
     return redirect('dashboard_medicos')
 
-@login_required
+@admin_required
 def remover_paciente(request, paciente_id):
-    if not request.user.is_staff:
-        return redirect('painel')
     paciente = get_object_or_404(User, pk=paciente_id, perfil__tipo_usuario='paciente')
+    nome = f"{paciente.first_name} {paciente.last_name}"
     paciente.delete()
+    messages.success(request, f'Paciente {nome} removido com sucesso.')
     return redirect('dashboard_pacientes')
 
-@login_required
+@admin_required
 def gerenciar_cargos(request, user_id):
-    if not request.user.is_staff:
-        return redirect('painel')
     usuario = get_object_or_404(User, pk=user_id)
+    perfil, created = Perfil.objects.get_or_create(usuario=usuario, defaults={'tipo_usuario': 'paciente'})
+    
     if request.method == 'POST':
         tipo_usuario = request.POST.get('tipo_usuario')
-        if tipo_usuario in ['medico', 'paciente', 'atendente']:
-            perfil, created = Perfil.objects.get_or_create(usuario=usuario)
+        if tipo_usuario in ['admin', 'medico', 'paciente', 'atendente']:
             perfil.tipo_usuario = tipo_usuario
             perfil.save()
+            messages.success(request, f'Cargo de {usuario.first_name} atualizado para {perfil.get_tipo_usuario_display()}.')
             return redirect('dashboard_pacientes')
-    return render(request, 'pessoas/gerenciar_cargos.html', {'usuario': usuario})
+    
+    cargos = Perfil.TIPOS_USUARIO
+    return render(request, 'pessoas/gerenciar_cargos.html', {
+        'usuario': usuario,
+        'perfil': perfil,
+        'cargos': cargos
+    })
 
 def consulta_rapida(request):
     return render(request, 'pessoas/consulta_rapida.html')

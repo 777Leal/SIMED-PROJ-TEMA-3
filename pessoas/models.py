@@ -7,15 +7,25 @@ from django.core.validators import MinValueValidator
 
 class Perfil(models.Model):
     """
-    Modelo para estender o User padrão com o tipo de perfil (Médico, Paciente ou Atendente)
+    Modelo para estender o User padrão com o tipo de perfil
+    Hierarquia: Admin > Médico > Atendente > Paciente
     """
     TIPOS_USUARIO = (
+        ('admin', 'Administrador'),
         ('medico', 'Médico'),
-        ('paciente', 'Paciente'),
         ('atendente', 'Atendente'),
+        ('paciente', 'Paciente'),
     )
+    
+    ROLE_HIERARCHY = {
+        'admin': 4,
+        'medico': 3,
+        'atendente': 2,
+        'paciente': 1,
+    }
+    
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
-    tipo_usuario = models.CharField(max_length=10, choices=TIPOS_USUARIO)
+    tipo_usuario = models.CharField(max_length=10, choices=TIPOS_USUARIO, default='paciente')
     data_nascimento = models.DateField(null=True, blank=True)
     rg = models.CharField(max_length=20, null=True, blank=True)
     endereco = models.CharField(max_length=255, null=True, blank=True)
@@ -23,6 +33,23 @@ class Perfil(models.Model):
 
     def __str__(self):
         return f'{self.usuario.username} - {self.get_tipo_usuario_display()}'
+    
+    @property
+    def role_level(self):
+        return self.ROLE_HIERARCHY.get(self.tipo_usuario, 0)
+    
+    def is_admin(self):
+        return self.tipo_usuario == 'admin' or self.usuario.is_staff or self.usuario.is_superuser
+    
+    def is_medico(self):
+        return self.tipo_usuario in ['admin', 'medico'] or self.usuario.is_staff
+    
+    def is_atendente(self):
+        return self.tipo_usuario in ['admin', 'medico', 'atendente'] or self.usuario.is_staff
+    
+    def has_min_role(self, min_role):
+        required_level = self.ROLE_HIERARCHY.get(min_role, 0)
+        return self.role_level >= required_level or self.usuario.is_staff
 
     class Meta:
         verbose_name = 'Perfil'

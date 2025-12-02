@@ -5,12 +5,18 @@ let selectedTimeSlot = null;
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
-    renderCalendar();
-    setupEventListeners();
+    const calendarContainer = document.getElementById('calendarDays');
+    if (calendarContainer) {
+        renderCalendar();
+        setupEventListeners();
+    }
 });
 
 // ===== RENDERIZAR CALENDÁRIO =====
 function renderCalendar() {
+    const calendarDays = document.getElementById('calendarDays');
+    if (!calendarDays) return;
+    
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     
@@ -20,13 +26,14 @@ function renderCalendar() {
         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
     ];
     
-    document.getElementById('monthYear').textContent = `${monthNames[month]}`;
+    const monthYearElement = document.getElementById('monthYear');
+    if (monthYearElement) monthYearElement.textContent = `${monthNames[month]}`;
     
     // Atualizar o título do calendário no topo (Janeiro)
-    document.querySelector('.calendar-header-top h2').textContent = monthNames[month];
+    const calendarHeaderTop = document.querySelector('.calendar-header-top h2');
+    if (calendarHeaderTop) calendarHeaderTop.textContent = monthNames[month];
     
     // Limpar dias anteriores
-    const calendarDays = document.getElementById('calendarDays');
     calendarDays.innerHTML = '';
     
     // Primeiro dia do mês
@@ -71,7 +78,7 @@ function renderCalendar() {
 // ===== CRIAR ELEMENTO DO DIA =====
 function createDayElement(day, isOtherMonth) {
     const dayElement = document.createElement('div');
-    dayElement.className = 'day';
+    dayElement.className = 'day day-cell';
     dayElement.textContent = day;
     
     if (isOtherMonth) {
