@@ -31,6 +31,7 @@ body {
 }
 
 /* Dropdown button */
+
 .dropdown .dropbtn {
     text-decoration: none;
     font-size: 16px;
@@ -1088,150 +1089,6 @@ form div {
 /* fim style Cadastro */
 
 
-
-/* codigo Coxinha */
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    scroll-behavior: smooth;
-    font-family: "Poppins", sans-serif;
-}
-
-
-/* CIRURGIA SECTION */
-.cirurgia {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative;
-    height: 600px;
-    background-color: #E9F2F9;
-    overflow: hidden; /* impede o círculo de vazar visualmente */
-}
-
-.cirurgia-content {
-    width: 50%;
-    padding: 70px 80px;
-    margin-top: 0px;
-    z-index: 2;
-}
-
-.cirurgia-content h1 {
-    color: #000000;
-    margin-bottom: 15px;
-    font-weight: 700;
-    font-size: 32px;
-}
-
-.cirurgia-content p {
-    color: #444;
-    font-size: 15px;
-    line-height: 1.6;
-    margin-bottom: 30px;
-}
-
-.botoes button {
-    border: none;
-    border-radius: 6px;
-    padding: 10px 25px;
-    font-weight: 500;
-    cursor: pointer;
-    margin-right: 10px;
-    transition: all 0.3s ease;
-    background-color: #0b1e45;
-    color: #ffffff;
-}
-
-.botoes button:hover {
-    background-color: #F26C4F; 
-    transform: translateY(-3px); 
-}
-
-.cirurgia-bg {
-    position: absolute;
-    right: -25%; 
-    top: 50%;
-    transform: translateY(-50%);
-    width: 800px;
-    height: 800px;
-    background-color: #0b1e45;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: left;
-    color: white;
-    padding: 100px;
-    z-index: 1;
-}
-
-.cirurgia-bg p {
-    width: 60%;
-    font-size: 15px;
-    line-height: 1.6;
-}
-
-
-/* CONVÊNIO */
-.convenio {
-    padding: 50px 80px;
-    text-align: left;
-}
-
-.convenio h3 {
-    margin-bottom: 25px;
-    color: #0b1e45;
-}
-
-.convenio-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #D9D9D9;
-    padding: 100px;
-    border-radius: 10px;
-    position: relative;
-}
-
-.seta {
-    font-size: 30px;
-    cursor: pointer;
-    position: absolute;
-    top: 40%;
-    color: #ffffff;
-}
-
-.seta:first-child {
-    left: 20px;
-}
-
-.seta:last-child {
-    right: 20px;
-}
-
-/* MAIS DETALHES */
-.detalhes {
-    padding: 50px 80px;
-}
-
-.detalhes h3 {
-    color: #0b1e45;
-    margin-bottom: 25px;
-}
-
-.detalhes-box {
-    display: flex;
-    gap: 30px;
-}
-
-.detalhes-box p {
-    width: 50%;
-    color: #444;
-    line-height: 1.6;
-}
-
-
 .sidebar {
     background-color: #1e3a70;
     padding: 100px 15px;
@@ -1276,20 +1133,36 @@ form div {
     font-size: 18px;
 }
 
-/* Inicio nos encontre */
+/* Estilos Gerais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Seção: Unidade Próxima */
 .unidade-proxima {
     background: #ffffff;
-    padding: 0 20px 0 20px;
+    padding: 0 20px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    position: relative;
+    min-height: 85vh;
+    margin-top: -60px;
     overflow: hidden;
-    z-index: 1;
-    height: 85vh;
 }
-
 
 .content-wrapper {
     max-width: 1400px;
@@ -1297,39 +1170,37 @@ form div {
     display: flex;
     align-items: center;
     gap: 100px;
-    /* position: relative; */
-    z-index: 2;
+    position: relative;
 }
 
+.image-container {
+    position: relative;
+}
 
 .blue-circle {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    overflow: hidden;
     position: absolute;
-    width: 700px;
-    height: 700px;
+    width: 800px;
+    height: 800px;
     border-radius: 50%;
     background-color: #1a3a52;
     z-index: 1;
-    transform: translate(-160px, -470px);
+    transform: translate(-140px, 135px);
 }
 
-.blue-circle .hospital-image {
-    width: 100%;
-    object-fit: cover; 
+.hospital-image {
+    width: 800px;
+    height: 800px;
+    border-radius: 50%;
+    object-fit: cover;
     display: block;
     position: relative;
     z-index: 2;
-    transform: translate(70px, -180px);
+    transform: translate(-140px, 135px);
 }
 
 .text-content {
-    position: absolute;
-    width: 30%;
+    width: 55%;
     padding-right: 40px;
-    transform: translate(700px, -250px);
 }
 
 .text-content h1 {
@@ -1339,13 +1210,14 @@ form div {
     margin-bottom: 30px;
     line-height: 1.1;
     letter-spacing: -0.5px;
+    transform: translate(-180px, 110px);
 }
 
 .text-content .highlight {
     color: #1a3a52;
     font-weight: 700;
     display: block;
-
+    transform: translate(60px, 10px);
 }
 
 .text-content p {
@@ -1354,257 +1226,184 @@ form div {
     line-height: 1.8;
     text-align: justify;
     font-weight: 400;
-
+    transform: translate(-120px, 95px);
 }
 
-.nos-encontre {
-    position: relative;
-    padding: 100px 40px;
-    color: #ffffff;
-    min-height: 500px;
+
+/* Inicio seção Nos Encontre */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #333;
+    line-height: 1.6;
+    background-color: #f4f7f6;
+    overflow-x: hidden;
+}
+
+.unidade-proxima {
+    background: #ffffff;
+    padding: 0 20px;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
+    min-height: 85vh;
+    margin-top: -60px;
     overflow: hidden;
-    background-color: #000;
 }
 
-.map-full-background {
-    /* Removido: background-image: url('img/Imagem Maps Cinza.jpg'); */
-    /* Mantendo o fundo escuro, mas sem a imagem */
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #000; /* Fundo preto para manter o contraste com o overlay */
-    opacity: 0.3;
-    z-index: 0;
-}
-
-.black-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(60, 60, 60, 0.6);
-}
-
-.content-wrapper-bottom {
+.content-wrapper {
     max-width: 1400px;
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 120px;
+    gap: 100px;
     position: relative;
-    z-index: 2;
 }
 
-.text-section {
-    flex: 1;
-    min-width: 0;
+.image-container { position: relative; }
+
+.blue-circle { position: absolute; width: 800px; height: 800px; border-radius: 50%; background-color: #1a3a52; z-index: 1;
+transform: translate(-140px, 135px); }
+.hospital-image { width: 800px; height: 800px; border-radius: 50%; object-fit: cover; display: block; position: relative; z-index: 2; transform: translate(-140px, 135px); }
+.text-content { width: 55%; padding-right: 40px; }
+.text-content h1 { font-size: 45px; font-weight: 700; color: #1a3a52; margin-bottom: 30px; line-height: 1.1; letter-spacing: -0.5px; transform: translate(-180px, 110px); }
+.text-content .highlight { color: #1a3a52; font-weight: 700; display: block; transform: translate(60px, 10px); }
+.text-content p { font-size: 17px; color: #1a3a52; line-height: 1.8; text-align: justify; font-weight: 400; transform: translate(-120px, 95px); }
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.text-section h2 {
-    font-size: 52px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: #ffffff;
-    letter-spacing: -0.5px;
+html {
+    scroll-behavior: smooth;
 }
 
-.subtitle {
-    font-size: 13px;
-    color: #a8b4ba;
-    margin-bottom: 35px;
-    font-weight: 500;
-}
-
-.info-block {
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.info-block:last-of-type {
-    border-bottom: none;
-}
-
-.info-block p {
-    font-size: 14px;
-    color: #ecf0f1;
-    margin-bottom: 4px;
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #333;
     line-height: 1.6;
-    font-weight: 400;
+    background-color: #f4f7f6;
+    overflow-x: hidden;
 }
 
-.info-block strong {
-    color: #ffffff;
-    font-weight: 600;
+.unidade-proxima {
+    background: #ffffff;
+    padding: 0 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    min-height: 85vh;
+    margin-top: -60px;
+    overflow: hidden;
 }
 
-.footer-text {
-    font-size: 13px;
-    color: #a8b4ba;
-    margin-top: 35px;
-    line-height: 1.8;
-    text-align: justify;
-    font-weight: 400;
+.content-wrapper {
+    max-width: 1400px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 100px;
+    position: relative;
 }
 
-.map-section {
-    flex: 1;
+
+.nos-encontre {
+    position: relative;
+    padding: 120px 40px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* OPACIDADE IMAGEM Google Maps Cinza */
+    background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.6)),
+        url('../images/ImagemMapsCinza.jpg'); /* Caminho relativo da imagem */
+
+    background-size: cover;
+    background-position: center center;
+
+    background-attachment: fixed; 
+}
+
+.content-wrapper-bottom {
     position: relative;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    /* min-height removido para se ajustar ao mapa */
+    gap: 80px;
+    max-width: 1400px;
+    width: 100%;
+    align-items: flex-start;
 }
 
-/* Elementos .location-pin e .pin-image removidos pois foram substituídos pelo mapa */
 
-/* RESPONSIVO */
-@media (max-width: 1024px) {
-    .content-wrapper {
-        gap: 60px;
+.text-section { flex: 1; min-width: 300px; }
+.text-section h2 { font-size: 52px; font-weight: 700; margin-bottom: 8px; color: #ffffff; letter-spacing: -0.5px; }
+.subtitle { font-size: 13px; color: #a8b4ba; margin-bottom: 35px; font-weight: 500; }
+.info-block { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
+.info-block:last-of-type { border-bottom: none; }
+.info-block p { font-size: 14px; color: #ecf0f1; margin-bottom: 4px; line-height: 1.6; }
+.info-block strong { color: #ffffff; font-weight: 600; }
+.footer-text { font-size: 13px; color: #a8b4ba; margin-top: 35px; line-height: 1.8; text-align: justify; }
+.map-section { flex: 1; min-width: 300px; }
+.map-container { position: relative; width: 100%; padding-top: 100%; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); border-radius: 8px; overflow: hidden; }
+.map-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+
+.site-footer {
+    position: relative;
+    z-index: 10;
+    background-color: #1a3a52;
+    color: #fff;
+    padding: 40px 20px;
+    text-align: center;
+    margin-top: -80px;
+    border-top-left-radius: 40px;
+    border-top-right-radius: 40px;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.footer-content { max-width: 1200px; margin: 0 auto; }
+.footer-logo { height: 50px; margin-bottom: 15px; }
+
+/* Responsividade */
+@media (max-width: 992px) {
+
+    .nos-encontre {
+        background-attachment: scroll;
     }
+}
+@media (max-width: 992px) {
+    .content-wrapper, .content-wrapper-bottom { flex-direction: column; text-align: center; }
+    .text-content { width: 100%; padding: 0; }
+    .text-content h1 { font-size: 38px; }
+    .content-wrapper-bottom { gap: 50px; }
+    .text-section, .map-section { width: 100%; max-width: 600px; }
+    
 
-    .image-container {
-        width: 990%;
+    .nos-encontre {
+        background-attachment: scroll;
     }
-
-    .hospital-image {
-        width: 340px;
-        height: 340px;
-    }
-
-    .text-content {
-        width: 50%;
-        padding-right: 20px;
-    }
-
-    .text-content h1 {
-        font-size: 44px;
-    }
-
-    .content-wrapper-bottom {
-        gap: 80px;
-    }
-
-    .text-section h2 {
-        font-size: 40px;
-    }
-
-
 }
 
 @media (max-width: 768px) {
-    .unidade-proxima {
-        padding: 50px 20px;
-    }
-
-    .content-wrapper {
-        flex-direction: column;
-        gap: 40px;
-    }
-
-    .image-container {
-        width: 100%;
-    }
-
-    .hospital-image {
-        width: 260px;
-        height: 260px;
-    }
-
-    .text-content {
-        width: 100%;
-        padding-right: 0;
-    }
-
-    .text-content h1 {
-        font-size: 36px;
-    }
-
-    .text-content p {
-        font-size: 15px;
-    }
-
-    .nos-encontre {
-        padding: 60px 20px;
-    }
-
-    .content-wrapper-bottom {
-        flex-direction: column;
-        gap: 40px;
-    }
-
-    .text-section h2 {
-        font-size: 32px;
-    }
-
-
+    .unidade-proxima { padding: 40px 20px; margin-top: 0; }
+    .nos-encontre { padding: 80px 20px; }
+    .text-section h2 { font-size: 40px; }
+    .site-footer { margin-top: -60px; border-top-left-radius: 30px; border-top-right-radius: 30px; }
 }
 
-@media (max-width: 480px) {
-    .unidade-proxima {
-        padding: 30px 15px;
-    }
-
-    .hospital-image {
-        width: 200px;
-        height: 200px;
-    }
-
-    .text-content h1 {
-        font-size: 28px;
-    }
-
-    .text-content p {
-        font-size: 14px;
-    }
-
-    .nos-encontre {
-        padding: 40px 15px;
-    }
-
-    .text-section h2 {
-        font-size: 28px;
-    }
-
-    .info-block p {
-        font-size: 13px;
-    }
-
-    .footer-text {
-        font-size: 12px;
-    }
-
-
-}
-
-/* Estilos para o mapa importados de mapa.html */
-.map-container {
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    padding-top: 56.25%; /* Proporção 16:9 */
-    margin: 20px auto;
-    max-width: 800px; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.map-container iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-}
-
-/* Fim nos encontre */
+/* Fim seção Nos Encontre */
 
 /* Inicio consulta */
 

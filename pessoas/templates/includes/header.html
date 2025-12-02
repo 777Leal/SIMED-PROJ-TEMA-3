@@ -14,7 +14,7 @@
                 <div class="dropdown-content">
                     <div class="row">
                         <div class="column">
-                            <a href="{% url 'home' %}">Consulta Online</a>
+                            <a href="{% url 'consulta_rapida' %}">Consulta Online</a>
                             <a href="{% url 'painel_paciente' %}">Consulta</a>
                         </div>
                         <div class="column">
@@ -52,7 +52,7 @@
                         <div class="column">
                             <div class="card">
                                 <div class="container">
-                                    <a href="{% url 'sobre' %}" class="sobre-links">
+                                    <a href="{% url 'profissionais' %}" class="sobre-links">
                                         <h2>Profissionais</h2>
                                         <p>Conheça nossa equipe de médicos prontos para atender nossos pacientes.</p>
                                     </a>
@@ -83,30 +83,7 @@
                 <a href="{% url 'encontre' %}" class="dropbtn">Nos Encontre
                     <i class="fa fa-caret-down"></i>
                 </a>
-                <div class="dropdown-content">
-                    <div class="row">
-                        <div class="column">
-                            <div class="card">
-                                <div class="container">
-                                    <a href="{% url 'home' %}" class="sobre-links">
-                                        <h2>Local</h2>
-                                        <p>Conheça nossa unidade de atendimento local em R. Alguma coisa, X.</p>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="column">
-                            <div class="card">
-                                <div class="container">
-                                    <a class="sobre-links">
-                                        <h2>Mapa</h2>
-                                        <p>mapa</p>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
 

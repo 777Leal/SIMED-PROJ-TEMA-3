@@ -17,7 +17,29 @@
                     <h4 class="titulo-agendamento">Agendar Nova Consulta</h4>
                     <form method="post" class="form-agendamento">
                         {% csrf_token %}
-                        {{ form.as_p }}
+                        {% for field in form %}
+    {% if field.name == 'data' %}
+        <p>
+            <label for="{{ field.id_for_label }}">{{ field.label }}:</label>
+            {{ field }}
+            {% if field.errors %}<small class="text-danger">{{ field.errors }}</small>{% endif %}
+        </p>
+    {% elif field.name == 'hora' %}
+        <p id="hora-field-container">
+            <label for="{{ field.id_for_label }}">{{ field.label }}:</label>
+            {{ field }}
+            {% if field.errors %}<small class="text-danger">{{ field.errors }}</small>{% endif %}
+        </p>
+    {% elif field.name == 'medico' %}
+        <p>
+            <label for="{{ field.id_for_label }}">{{ field.label }}:</label>
+            {{ field }}
+            {% if field.errors %}<small class="text-danger">{{ field.errors }}</small>{% endif %}
+        </p>
+    {% else %}
+        {{ field.as_p }}
+    {% endif %}
+{% endfor %}
                         {{ perfil_form.as_p }}
                         <button type="submit" class="btn btn-primary btn-agendar">Agendar</button>
                     </form>
@@ -45,4 +67,63 @@
 
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const medicoSelect = document.getElementById('id_medico');
+        const dataInput = document.getElementById('id_data');
+        const horaSelect = document.getElementById('id_hora');
+        const horaContainer = document.getElementById('hora-field-container');
+
+                // Função para buscar e atualizar os horários
+        function atualizarHorarios() {
+            const medicoId = medicoSelect.value;
+            const dataSelecionada = dataInput.value;
+
+            // Se o médico ou a data não estiverem selecionados, limpa o campo de hora
+            if (!medicoId || !dataSelecionada) {
+                horaSelect.innerHTML = '<option value="">---------</option>';
+                return;
+            }
+
+            // Faz a chamada AJAX para a nova view
+            fetch(`/ajax/horarios_disponiveis/?medico_id=${medicoId}&data=${dataSelecionada}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Limpa as opções atuais
+                    horaSelect.innerHTML = '<option value="">---------</option>';
+
+                    if (data.horarios && data.horarios.length > 0) {
+                        // Adiciona as novas opções
+                        data.horarios.forEach(horario => {
+                            const option = document.createElement('option');
+                            option.value = horario.value;
+                            option.textContent = horario.display;
+                            horaSelect.appendChild(option);
+                        });
+                    } else {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = 'Nenhum horário disponível';
+                        horaSelect.appendChild(option);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar horários:', error);
+                    horaSelect.innerHTML = '<option value="">Erro ao carregar horários</option>';
+                });
+        }
+
+        // Adiciona listeners para mudança nos campos
+        medicoSelect.addEventListener('change', atualizarHorarios);
+        dataInput.addEventListener('change', atualizarHorarios);
+        
+        // Chama a função na carga inicial se os campos já estiverem preenchidos (ex: após erro de validação)
+        if (medicoSelect.value && dataInput.value) {
+            atualizarHorarios();
+        }
+    });
+</script>
 {% endblock %}

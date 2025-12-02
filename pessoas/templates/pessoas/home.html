@@ -18,7 +18,7 @@
             <h1>SIMED - SERVIÇO INTEGRADO DE MEDICINA</h1>
             <p>Na SIMED, unimos tecnologia, cuidado e experiência para oferecer um atendimento humanizado e de qualidade. Nossa equipe de profissionais está preparada para cuidar da sua saúde com dedicação, respeito e excelência em cada detalhe. Aqui, você encontra o suporte que precisa para viver melhor todos os dias.<br>Com estrutura moderna e diversos especialistas, a SIMED oferece consultas, exames e programas de prevenção em um só lugar. Nosso compromisso é garantir conforto, agilidade e confiança em cada etapa do seu atendimento, porque cuidar de você é a nossa prioridade.</p>
             <div class="btns">
-                <a href="#" class="btn btn-primary">Agende sua Consulta</a>
+                <a href="{% if user.is_authenticated %}{% url 'painel_paciente' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-primary">Agende sua Consulta</a>
             </div>
         </div>
         <div class="section-50">
@@ -213,7 +213,7 @@ $(document).ready(function(){
       <p>
         Marque agora seu atendimento, adapte seu tempo livre ao nosso horário de funcionamento
       </p>
-      <button class="btn-agendar">Marque agora sua agenda</button>
+      <a href="{% if user.is_authenticated %}{% url 'painel_paciente' %}{% else %}{% url 'login' %}{% endif %}" class="btn-agendar">Marque agora sua agenda</a>
     </div>
   </div>
 </section>

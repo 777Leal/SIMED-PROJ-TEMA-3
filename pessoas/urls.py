@@ -8,12 +8,12 @@ from django.contrib.auth import views as auth_views
 # A linha app_name = 'pessoas' foi REMOVIDA para corrigir o NoReverseMatch
 
 urlpatterns = [
-    path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
     # O path('admin/', ...) foi REMOVIDO daqui.
     
     # O path('home/', ...) foi MUDADO para '' (vazio) para corrigir o erro 404
    path('', views.home, name='home'),
    path('sobre/', views.sobre, name='sobre'),
+   path('consulta-rapida/', views.consulta_rapida, name='consulta_rapida'),
        
     path('cirurgia/', views.cirurgia, name='cirurgia'),
     path('exames/', views.exames, name='exames'),
@@ -25,17 +25,21 @@ urlpatterns = [
     path('agenda/', views.agenda, name='agenda'),
     path('checkup_consulta/', views.checkup_consulta, name='checkup_consulta'),
     path('checkup_tratamento/', views.checkup_tratamento, name='checkup_tratamento'),
+    path('politicas-de-uso/', views.politicas_de_uso, name='politicas-de-uso'),
+    path('profissionais/', views.profissionais, name='profissionais'),
+    path('privacidade/', views.privacidade, name='privacidade'),
 
     # URLs de Autenticação
     path("cadastrar_usuario/", views.cadastrar_usuario, name="cadastro"),
     path("login/", views.login_view, name="login"),
-    # path("logout/", views.logout_view, name="logout"), --comentado
+    path("logout/", views.logout_view, name="logout"),
 
     # URLs dos Painéis
     path("painel/", views.painel, name="painel"),
     path("painel/medico/", views.painel_medico, name="painel_medico"),
     path("painel/paciente/", views.painel_paciente, name="painel_paciente"),
     path("painel/atendente/", views.painel_atendente, name="painel_atendente"),
+    path('ajax/horarios_disponiveis/', views.get_horarios_disponiveis_ajax, name='horarios_disponiveis_ajax'),
 
     # URLs de Ações
     path("consulta/<int:consulta_id>/relatorio/", views.escrever_relatorio, name="escrever_relatorio"),

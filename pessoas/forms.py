@@ -4,6 +4,22 @@ from django import forms
 from django.contrib.auth.models import User
 from .models import Medicamento, Perfil, Consulta
 from django.contrib.auth import authenticate
+from datetime import time, datetime, timedelta
+from django.utils import timezone
+
+def gerar_todos_horarios_possiveis():
+    """Gera uma lista de todos os horários de 15 em 15 minutos entre 08:00 e 17:45."""
+    horarios = [('', '---------')]
+    hora_inicio = datetime.strptime("08:00", "%H:%M").time()
+    hora_fim = datetime.strptime("18:00", "%H:%M").time()
+    intervalo = timedelta(minutes=15)
+
+    current_time = datetime.combine(datetime.min, hora_inicio)
+    while current_time.time() < hora_fim:
+        hora = current_time.time()
+        horarios.append((hora.isoformat(timespec='minutes'), hora.strftime("%H:%M")))
+        current_time += intervalo
+    return horarios
 
 class LoginUsuarioForm(forms.Form):
     username = forms.CharField(
@@ -107,16 +123,97 @@ class PerfilForm(forms.ModelForm):
 
 # Formulário para agendar uma nova consulta (para o paciente)
 class AgendarConsultaForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['hora'].choices = gerar_todos_horarios_possiveis()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        data = cleaned_data.get('data')
+        hora_str = cleaned_data.get('hora')
+        medico = cleaned_data.get('medico')
+
+        if data and hora_str and medico:
+            # Combina data e hora
+            try:
+                hora = time.fromisoformat(hora_str)
+                data_hora = timezone.make_aware(datetime.combine(data, hora))
+            except ValueError:
+                raise forms.ValidationError("Formato de hora inválido.")
+
+            # 1. Restrição de horário de funcionamento (8h às 18h)
+            if not (time(8, 0) <= hora < time(18, 0)):
+                raise forms.ValidationError("O horário de agendamento deve ser entre 08:00 e 18:00.")
+
+            # 2. Espaçamento mínimo de 15 minutos (já garantido pela geração de choices, mas bom ter)
+            if hora.minute % 15 != 0:
+                raise forms.ValidationError("O agendamento deve ser feito em intervalos de 15 minutos.")
+
+            # 3. Verifica se o horário está ocupado (redundante se a lista for gerada corretamente, mas é uma segurança)
+            consulta_existente = Consulta.objects.filter(
+                medico=medico,
+                data_hora=data_hora,
+                status='agendada'
+            ).exists()
+
+            if consulta_existente:
+                raise forms.ValidationError("Este horário já está ocupado. Por favor, escolha outro.")
+
+            # Adiciona o campo data_hora completo para ser usado na view
+            cleaned_data['data_hora'] = data_hora
+
+        return cleaned_data
     # O campo "medico" será um dropdown com todos os usuários que são médicos
     medico = forms.ModelChoiceField(queryset=User.objects.filter(perfil__tipo_usuario="medico"))
-    data_hora = forms.DateTimeField(widget=forms.DateTimeInput(attrs={"type": "datetime-local"}))
+    data = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
+    hora = forms.ChoiceField(choices=[]) # Será preenchido dinamicamente na view
 
     class Meta:
         model = Consulta
-        fields = ["medico", "data_hora"]
+        fields = ["medico", "data", "hora"]
 
 # Formulário para agendar uma nova consulta (para o atendente)
 class AgendarConsultaAtendenteForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['hora'].choices = gerar_todos_horarios_possiveis()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        data = cleaned_data.get('data')
+        hora_str = cleaned_data.get('hora')
+        medico = cleaned_data.get('medico')
+
+        if data and hora_str and medico:
+            # Combina data e hora
+            try:
+                hora = time.fromisoformat(hora_str)
+                data_hora = timezone.make_aware(datetime.combine(data, hora))
+            except ValueError:
+                raise forms.ValidationError("Formato de hora inválido.")
+
+            # 1. Restrição de horário de funcionamento (8h às 18h)
+            if not (time(8, 0) <= hora < time(18, 0)):
+                raise forms.ValidationError("O horário de agendamento deve ser entre 08:00 e 18:00.")
+
+            # 2. Espaçamento mínimo de 15 minutos (já garantido pela geração de choices, mas bom ter)
+            if hora.minute % 15 != 0:
+                raise forms.ValidationError("O agendamento deve ser feito em intervalos de 15 minutos.")
+
+            # 3. Verifica se o horário está ocupado (redundante se a lista for gerada corretamente, mas é uma segurança)
+            consulta_existente = Consulta.objects.filter(
+                medico=medico,
+                data_hora=data_hora,
+                status='agendada'
+            ).exists()
+
+            if consulta_existente:
+                raise forms.ValidationError("Este horário já está ocupado. Por favor, escolha outro.")
+
+            # Adiciona o campo data_hora completo para ser usado na view
+            cleaned_data['data_hora'] = data_hora
+
+        return cleaned_data
     # O atendente precisa selecionar o paciente
     paciente = forms.ModelChoiceField(
         queryset=User.objects.filter(perfil__tipo_usuario="paciente"),
@@ -127,14 +224,18 @@ class AgendarConsultaAtendenteForm(forms.ModelForm):
         queryset=User.objects.filter(perfil__tipo_usuario="medico"),
         label="Médico"
     )
-    data_hora = forms.DateTimeField(
-        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
-        label="Data e Hora"
+    data = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}),
+        label="Data"
+    )
+    hora = forms.ChoiceField(
+        choices=[], # Será preenchido dinamicamente na view
+        label="Hora"
     )
 
     class Meta:
         model = Consulta
-        fields = ["paciente", "medico", "data_hora"]
+        fields = ["paciente", "medico", "data", "hora"]
 
 # Formulário para o médico escrever o relatório
 class RelatorioConsultaForm(forms.ModelForm):

@@ -1,0 +1,397 @@
+{% extends 'pessoas/base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+        body {
+            font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+
+            margin: 0;
+            padding: 0;
+            background-color: #9CC4E4; /* Cor de fundo geral */
+        }
+h1{
+     font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+   
+        /* Hero Section */
+        .section-hero {
+            background-color: #E9F2F9; /* Um tom de azul claro */
+            padding: 0px 0;
+            text-align: center;
+        }
+
+        .section-hero .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            flex-direction: row; /* Conteúdo à esquerda, Imagem à direita por padrão */
+        }
+
+        .section-hero .hero-content {
+            order: 1; /* Conteúdo na esquerda */
+        }
+
+        .section-hero .hero-image {
+            order: 2; /* Imagem na direita */
+        }
+
+        .hero-content {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            text-align: left;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+            
+        }
+
+        .hero-content p {
+            font-size: 1.1em;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .hero-buttons a {
+            display: inline-block;
+            background-color: #1B325F; /* Azul padrão para botões */
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-right: 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        .hero-buttons a:hover {
+            background-color: #0056b3;
+        }
+
+        .hero-image {
+            display: flex;
+            justify-content: end;
+            flex: 1;
+            min-width: 300px;
+            text-align: center; 
+        }
+
+        .hero-image img {
+            max-width: 90%;
+            height: 20px
+            margin: 30px
+        }
+
+        /* Certifications and Objectives Sections */
+        .section-certifications,
+        .section-objectives {
+            background-color: #9CC4E4; /* Mesmo azul claro */
+            padding: 40px 0;
+            margin-top: 2px;
+        }
+
+        .section-certifications h2,
+        .section-objectives h2 {
+            font-size: 2em;
+            color: #FFFFFF;
+           margin-left: 20px;
+            margin-bottom: 30px;
+
+             font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+        }
+
+        .certifications-content,
+        .objectives-content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 0 20px;
+        }
+
+        .certifications-text,
+        .objectives-text {
+            flex: 2;
+            min-width: 300px;
+            padding-right: 30px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .certifications-carousel {
+            flex: 1;
+            min-width: 250px;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+            .certifications-carousel {
+                position: relative;
+                overflow: hidden;
+                width: 100%;
+            }
+
+            .carousel-inner {
+                display: flex;
+                gap: 10px;
+                transition: transform 0.5s ease-in-out;
+            }
+
+            .carousel-item {
+                min-width: 100%;
+                box-sizing: border-box;
+                text-align: center;
+            }
+
+            .carousel-item img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 8px;
+                margin-bottom: 10px;
+            }
+
+            .carousel-control {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                background-color: rgba(0, 0, 0, 0.5);
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                cursor: pointer;
+                z-index: 10;
+                border-radius: 50%;
+            }
+
+            .carousel-control.prev {
+                left: 10px;
+            }
+
+            .carousel-control.next {
+                right: 10px;
+            }
+
+            .carousel-indicators {
+                position: absolute;
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 8px;
+            }
+
+            .indicator {
+                width: 10px;
+                height: 10px;
+                background-color: rgba(255, 255, 255, 0.5);
+                border-radius: 50%;
+                cursor: pointer;
+            }
+
+            .indicator.active {
+                background-color: white;
+            }
+
+        
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .navbar .container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .navbar-links {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            .section-hero .container {
+                flex-direction: column; /* Em telas menores, a imagem fica abaixo do conteúdo */
+            }
+            .hero-content {
+                order: 1; /* Conteúdo primeiro em telas menores */
+            }
+            .hero-image {
+                order: 2; /* Imagem segundo em telas menores */
+            }
+            .hero-content,
+            .hero-image {
+                text-align: center;
+                padding-right: 20px;
+            }
+            .certifications-text,
+            .objectives-text {
+                padding-right: 0;
+                margin-bottom: 20px;
+            }
+            .certifications-content,
+            .objectives-content {
+                flex-direction: column;
+            }
+            .footer .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .footer-section {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+
+    <section class="section-hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Roberto Kalil - Clínica Geral</h1>
+                <p>Roberto Kalil Filho é um renomado cardiologista brasileiro, formado e especializado na USP, com pós-doutorado na Johns Hopkins. Professor titular da Faculdade de Medicina da USP e diretor de Cardiologia Clínica do InCor, também atua no Hospital Sírio-Libanês. É referência em doenças cardíacas, cardio-oncologia e imagem cardiovascular, tendo grande impacto na formação de especialistas. Além disso, aparece com frequência na mídia, atende figuras públicas e recebeu diversos prêmios pela contribuição à medicina no Brasil.
+
+
+<p>Agende sua consulta e dê o primeiro passo para uma vida mais saudável.</p></p>
+                <div class="hero-buttons">
+                    <a href="#">Agendar com Roberto</a>
+                    <a href="#">Agendar com (XX) 9999-999</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="/static/images/RobertoKalil.png" alt="Imagem do Profissional">
+            </div>
+        </div>
+    </section>
+
+    <section class="section-certifications">
+        <div class="container">
+            <h2>Certificações</h2>
+            <div class="certifications-content">
+                <div class="certifications-text">
+                    <p>Roberto Kalil possui diversas certificações nacionais e internacionais que reforçam seu compromisso com a excelência e atualização constante na área médica.
+
+<li>Certificação em Medicina Preventiva e Estilo de Vida</li>
+
+<li>Pós-graduação em Nutrologia Clínica</li>
+
+<li>Treinamento em Atendimento Humanizado ao Paciente</li>
+
+<li>Membro da Sociedade Brasileira de Clínica Médica</li>
+
+🩸 “Conhecimento é o melhor remédio para cuidar de quem mais importa: você.”</p>
+                </div>
+                <div class="certifications-carousel">
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <img src="https://qualifio.org.br/images/certificado.png" alt="Certificação 1">
+                            <p>Descrição da Certificação 1</p>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://qualifio.org.br/images/certificado.png" alt="Certificação 2">
+                            <p>Descrição da Certificação 2</p>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://qualifio.org.br/images/certificado.png" alt="Certificação 3">
+                            <p>Descrição da Certificação 3</p>
+                        </div>
+                    </div>
+                    <button class="carousel-control prev">&lt;</button>
+                    <button class="carousel-control next">&gt;</button>
+                    <div class="carousel-indicators">
+                        <span class="indicator active"></span>
+                        <span class="indicator"></span>
+                        <span class="indicator"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-objectives">
+        <div class="container">
+            <h2>Objetivos</h2>
+            <div class="objectives-content">
+                <div class="objectives-text"><p>O principal objetivo do Dr. Roberto Kalil é proporcionar um atendimento médico completo e personalizado, baseado em empatia, ética e ciência.
+Roberto Kalil Filho é um cardiologista brasileiro, nascido em 1959 em São Paulo. Formou-se em Medicina e especializou-se em cardiologia no Hospital das Clínicas da USP, além de ter feito pós-doutorado na Johns Hopkins University, nos EUA.
+
+Atualmente, é professor titular da Faculdade de Medicina da USP, diretor da Divisão de Cardiologia Clínica do InCor e atua no Hospital Sírio-Libanês. É referência nacional em doenças cardíacas, cardio-oncologia e imagem cardiovascular, tendo contribuído para a formação de novos cardiologistas.
+
+Também é conhecido por sua participação na mídia e por atender personalidades públicas. Recebeu diversos prêmios por sua contribuição à medicina e à cardiologia no Brasil.
+
+<p>Entre suas metas estão: </p>
+
+<li>Oferecer diagnósticos precisos e tratamentos eficazes.</li>
+
+<li>Incentivar hábitos saudáveis e acompanhamento contínuo.</li>
+
+Garantir um ambiente acolhedor e de confiança para todos os pacientes.</p>                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Script para ícones das redes sociais (Font Awesome via CDN) -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+    <script>
+        const carousel = document.querySelector('.certifications-carousel');
+        const carouselInner = carousel.querySelector('.carousel-inner');
+        const carouselItems = carousel.querySelectorAll('.carousel-item');
+        const prevButton = carousel.querySelector('.prev');
+        const nextButton = carousel.querySelector('.next');
+        const indicators = carousel.querySelectorAll('.indicator');
+        let currentIndex = 0;
+
+        function updateCarousel() {
+            carouselInner.style.transform = `translateX(${-currentIndex * 103}%)`;
+            indicators.forEach((indicator, index) => {
+                if (index === currentIndex) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            });
+        }
+
+        prevButton.addEventListener('click', () => {
+            currentIndex = (currentIndex > 0) ? currentIndex - 1 : carouselItems.length - 1;
+            updateCarousel();
+        });
+
+        nextButton.addEventListener('click', () => {
+            currentIndex = (currentIndex < carouselItems.length - 1) ? currentIndex + 1 : 0;
+            updateCarousel();
+        });
+
+        indicators.forEach((indicator, index) => {
+            indicator.addEventListener('click', () => {
+                currentIndex = index;
+                updateCarousel();
+            });
+        });
+
+        updateCarousel(); // Initial update
+    </script>
+
+</body>
+</html>
+
+{% endblock %}

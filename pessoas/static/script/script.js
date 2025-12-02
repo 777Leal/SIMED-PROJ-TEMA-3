@@ -259,6 +259,108 @@ const treatments = [
             'Plano Alimentar Personalizado'
         ],
         value: 'Variável (a partir de R$ 280,00)'
+    },
+    {
+        id: 'oftalmo-basico',
+        name: 'Tratamento Completo de Oftalmologia Básico',
+        description: 'Tratamento oftalmológico básico para cuidados essenciais com a saúde ocular.',
+        includes: [
+            'Consulta Oftalmológica',
+            'Exame de Refração',
+            'Medição de Pressão Intraocular',
+            'Prescrição de Óculos ou Lentes (se necessário)'
+        ],
+        value: 'R$ 500,00'
+    },
+    {
+        id: 'cirurgia-basica',
+        name: 'Cirurgia Básica',
+        description: 'Procedimento cirúrgico de baixa complexidade.',
+        includes: [
+            'Avaliação Pré-Operatória',
+            'Procedimento Cirúrgico',
+            'Acompanhamento Pós-Operatório'
+        ],
+        value: 'R$ 1.000,00'
+    },
+    {
+        id: 'cirurgia-media',
+        name: 'Cirurgia Média',
+        description: 'Procedimento cirúrgico de média complexidade.',
+        includes: [
+            'Avaliação Pré-Operatória Completa',
+            'Procedimento Cirúrgico',
+            'Acompanhamento Pós-Operatório Especializado'
+        ],
+        value: 'R$ 1.400,00'
+    },
+    {
+        id: 'cirurgia-dificil',
+        name: 'Cirurgia Difícil',
+        description: 'Procedimento cirúrgico de alta complexidade.',
+        includes: [
+            'Avaliação Pré-Operatória Detalhada',
+            'Procedimento Cirúrgico Complexo',
+            'Acompanhamento Pós-Operatório Intensivo'
+        ],
+        value: 'R$ 2.000,00'
+    },
+    {
+        id: 'exames-gerais',
+        name: 'Exames Gerais',
+        description: 'Conjunto de exames laboratoriais e clínicos básicos.',
+        includes: [
+            'Hemograma Completo',
+            'Glicemia',
+            'Colesterol Total e Frações',
+            'Exame de Urina'
+        ],
+        value: 'R$ 300,00'
+    },
+    {
+        id: 'exames-especificos',
+        name: 'Exames Específicos',
+        description: 'Exames laboratoriais e de imagem especializados.',
+        includes: [
+            'Exames Específicos Conforme Solicitação Médica',
+            'Análises Laboratoriais Especializadas',
+            'Laudos Detalhados'
+        ],
+        value: 'R$ 500,00'
+    },
+    {
+        id: 'consulta-geral',
+        name: 'Consulta Geral',
+        description: 'Consulta médica geral para avaliação de saúde.',
+        includes: [
+            'Anamnese Completa',
+            'Exame Físico',
+            'Orientações e Prescrições Médicas'
+        ],
+        value: 'R$ 300,00'
+    },
+    {
+        id: 'odonto-basico',
+        name: 'Tratamento Completo de Odontologia Básico',
+        description: 'Tratamento odontológico básico para manutenção da saúde bucal.',
+        includes: [
+            'Consulta Odontológica',
+            'Limpeza e Profilaxia',
+            'Aplicação de Flúor',
+            'Orientações de Higiene Bucal'
+        ],
+        value: 'R$ 500,00'
+    },
+    {
+        id: 'tomografia',
+        name: 'Tomografia',
+        description: 'Exame de imagem por tomografia computadorizada.',
+        includes: [
+            'Tomografia Computadorizada',
+            'Laudo Médico Especializado',
+            'Imagens Digitais'
+        ],
+        value: 'R$ 300,00'
     }
 ];
 

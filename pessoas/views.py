@@ -8,6 +8,76 @@ from .forms import (
     MedicamentoForm, LoginUsuarioForm
 )
 from .models import User, Perfil, Consulta, Medicamento
+from django.utils import timezone
+from datetime import timedelta, time, datetime
+from django.db.models import Q
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+def gerar_horarios_disponiveis(medico_id, data_selecionada=None):
+    """
+    Gera uma lista de tuplas (hora_str, hora_str) para os horários disponíveis
+    do médico no dia selecionado, de 15 em 15 minutos, das 8h às 18h.
+    """
+    horarios_base = []
+    hora_inicio = datetime.strptime("08:00", "%H:%M").time()
+    hora_fim = datetime.strptime("18:00", "%H:%M").time()
+    intervalo = timedelta(minutes=15)
+
+    # Gera todos os horários possíveis de 15 em 15 minutos
+    current_time = datetime.combine(datetime.min, hora_inicio)
+    while current_time.time() < hora_fim:
+        horarios_base.append(current_time.time())
+        current_time += intervalo
+
+    if not medico_id or not data_selecionada:
+        # Se o médico ou a data não forem selecionados, retorna uma lista vazia
+        return []
+
+    # Se a data for selecionada, verifica as consultas existentes
+    data_inicio = timezone.make_aware(datetime.combine(data_selecionada, hora_inicio))
+    data_fim = timezone.make_aware(datetime.combine(data_selecionada, hora_fim))
+
+    consultas_ocupadas = Consulta.objects.filter(
+        medico__id=medico_id,
+        data_hora__gte=data_inicio,
+        data_hora__lt=data_fim,
+        status='agendada'
+    ).values_list('data_hora', flat=True)
+
+    # Converte os datetimes ocupados para objetos time localizados
+    horarios_ocupados = {timezone.localtime(dt).time() for dt in consultas_ocupadas}
+    
+    horarios_disponiveis = []
+    for h in horarios_base:
+        if h not in horarios_ocupados:
+            horarios_disponiveis.append((h.isoformat(timespec='minutes'), h.strftime("%H:%M")))
+            
+    return horarios_disponiveis
+
+@require_GET
+def get_horarios_disponiveis_ajax(request):
+    """
+    View AJAX para retornar os horários disponíveis para um médico e data específicos.
+    """
+    medico_id_str = request.GET.get('medico_id')
+    data_str = request.GET.get('data')
+
+    if not medico_id_str or not data_str:
+        return JsonResponse({'error': 'Médico e data são obrigatórios.'}, status=400)
+
+    try:
+        medico_id = int(medico_id_str)
+        data_selecionada = datetime.strptime(data_str, '%Y-%m-%d').date()
+    except ValueError:
+        return JsonResponse({'error': 'ID do médico ou formato de data inválido.'}, status=400)
+
+    horarios = gerar_horarios_disponiveis(medico_id, data_selecionada)
+    
+    # Formato de retorno: [{'value': '08:00:00', 'display': '08:00'}, ...]
+    horarios_json = [{'value': h[0], 'display': h[1]} for h in horarios]
+
+    return JsonResponse({'horarios': horarios_json})
 
 # --- VIEWS DE PÁGINA ---
 
@@ -24,34 +94,35 @@ def nos_encontre(request):
     return render(request, 'pessoas/encontre.html')
 
 def cirurgia(request):
-    # Esta vai carregar o cirurgia.html
     return render(request, 'pessoas/cirurgia.html')
 
 def exames(request):
-    # Esta vai carregar o exames.html
     return render(request, 'pessoas/exames.html')
 
 def odontologia(request):
-    # Esta vai carregar o odontologia.html
     return render(request, 'pessoas/odontologia.html')
 
 def oftalmologia(request):
-    # Esta vai carregar o oftalmologia.html (corrigido de 'oftalmolofia')
     return render(request, 'pessoas/oftalmologia.html') 
 
 def tomografia(request):
-    # Esta vai carregar o tomografia.html
     return render(request, 'pessoas/tomografia.html')
 
 def consulta(request):
-    # Esta vai carregar o consulta.html
     return render(request, 'pessoas/consulta.html')
 
 def agenda(request):
-    # Esta vai carregar o agenda.html
     return render(request, 'pessoas/agenda.html')
 
-    
+def politicas_de_uso(request): 
+    return render(request, 'pessoas/politicas-de-uso.html')
+
+def profissionais(request):
+    return render(request,'pessoas/profissionais.html')
+
+def privacidade(request):
+    return render(request,'pessoas/privacidade.html')
+
 # --- VIEWS DE AUTENTICAÇÃO ---
 
 def login_view(request):
@@ -60,10 +131,23 @@ def login_view(request):
         if form.is_valid():
             user = form.cleaned_data['user']
             login(request, user)
-            return redirect('home') # Redireciona para home (ou 'painel')
+
+            # Redirecionamento baseado no tipo de usuário
+            if user.is_staff:
+                return redirect('dashboard_consultas')   # ADMIN → Dashboard Admin
+            elif hasattr(user, 'perfil'):
+                if user.perfil.tipo_usuario == 'medico':
+                    return redirect('dashboard')
+                elif user.perfil.tipo_usuario == 'paciente':
+                    return redirect('home')
+                elif user.perfil.tipo_usuario == 'atendente':
+                    return redirect('painel_atendente')
+
+            return redirect('home')
     else:
         form = LoginUsuarioForm()
     return render(request, 'pessoas/login.html', {'form': form})
+
 
 def cadastrar_usuario(request):
     if request.method == 'POST':
@@ -72,17 +156,14 @@ def cadastrar_usuario(request):
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
             user.save()
-            # Cria o perfil padrão (Paciente) para o novo usuário
             Perfil.objects.get_or_create(usuario=user, defaults={'tipo_usuario': 'paciente'})
-            return redirect('login')  # redireciona após cadastro
+            return redirect('login')
     else:
         form = CadastroUsuarioForm()
 
     return render(request, 'pessoas/cadastrar_usuario.html', {'form': form})
 
-
 def logout_view(request):
-    """Faz o logout do usuário."""
     logout(request)
     return redirect('login')
 
@@ -90,17 +171,17 @@ def logout_view(request):
 
 def excluir_medicamento(request, medicamento_id):
     medicamento = get_object_or_404(Medicamento, pk=medicamento_id)
-    if request.method == 'POST':
-        medicamento.delete()
-        return redirect('lista_medicamentos')
-    return redirect('lista_medicamentos')
+    # if request.method == 'POST':
+    #     medicamento.delete()
+    #     return redirect('lista_medicamentos')
+    # return redirect('lista_medicamentos')
 
 def cadastrar_medicamento(request):
     if request.method == 'POST':
         form = MedicamentoForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('lista_medicamentos')
+            return redirect('dashboard_produtos')
     else:
         form = MedicamentoForm()
     
@@ -118,35 +199,28 @@ def lista_medicamentos(request):
 
 # --- PAINÉIS (DASHBOARDS) ---
 
-@login_required # Garante que apenas usuários logados acessem esta view
+@login_required
 def painel(request):
-    """
-    View principal que verifica o tipo de usuário e o redireciona
-    para o painel correto (médico, paciente ou atendente).
-    """
     try:
         perfil = request.user.perfil
         if request.user.is_staff:
-            return redirect('dashboard_consultas') # Redireciona admin para a página de consultas
+            return redirect('dashboard_consultas')
         elif perfil.tipo_usuario == 'medico':
-            return redirect('dashboard') # Redireciona médico para o painel médico
+            return redirect('dashboard')
         elif perfil.tipo_usuario == 'paciente':
             return redirect('home')
         elif perfil.tipo_usuario == "atendente":
             return redirect("painel_atendente")
     except Perfil.DoesNotExist:
-        # Caso um usuário (ex: admin) não tenha perfil, redireciona
-        return redirect('login') # Ou para uma página de "Completar Perfil"
+        return redirect('login')
         
 @login_required
 def painel_medico(request):
-    """Painel do médico, mostra suas consultas agendadas."""
     consultas = Consulta.objects.filter(medico=request.user).order_by('data_hora')
     return render(request, 'pessoas/painel_medico.html', {'consultas': consultas})
 
 @login_required
 def painel_paciente(request):
-    """Painel do paciente, mostra suas consultas e permite agendar novas."""
     consultas = Consulta.objects.filter(paciente=request.user).order_by('data_hora')
     perfil = request.user.perfil
 
@@ -156,12 +230,15 @@ def painel_paciente(request):
         if form.is_valid() and perfil_form.is_valid():
             nova_consulta = form.save(commit=False)
             nova_consulta.paciente = request.user
+            nova_consulta.data_hora = form.cleaned_data.get('data_hora')
             nova_consulta.save()
             perfil_form.save()
             return redirect('painel_paciente')
     else:
         form = AgendarConsultaForm()
         perfil_form = PerfilForm(instance=perfil)
+
+    # A lógica de preenchimento de choices foi movida para o forms.py
 
     return render(request, 'pessoas/painel_paciente.html', {
         'consultas': consultas,
@@ -171,17 +248,14 @@ def painel_paciente(request):
 
 @login_required
 def checkup_consulta(request):
-    # Esta vai carregar o checkup_consulta.html
     return render(request, 'pessoas/checkup_consulta.html')
 
 @login_required
 def checkup_tratamento(request):
-    # Esta vai carregar o checkup_tratamento.html
     return render(request, 'pessoas/checkup_tratamento.html')
     
 @login_required
 def painel_atendente(request):
-    """Painel do atendente, mostra todas as consultas e permite agendar novas."""
     if request.user.perfil.tipo_usuario != "atendente":
         return redirect("painel")
 
@@ -190,10 +264,14 @@ def painel_atendente(request):
     if request.method == "POST":
         form = AgendarConsultaAtendenteForm(request.POST)
         if form.is_valid():
-            form.save()
+            nova_consulta = form.save(commit=False)
+            nova_consulta.data_hora = form.cleaned_data.get('data_hora')
+            nova_consulta.save()
             return redirect("painel_atendente")
     else:
         form = AgendarConsultaAtendenteForm()
+
+    form.fields['hora'].choices = [('', '---------')]
 
     return render(request, "pessoas/painel_atendente.html", {
         "consultas": consultas,
@@ -204,7 +282,6 @@ def painel_atendente(request):
 
 @login_required
 def escrever_relatorio(request, consulta_id):
-    """Permite que um médico adicione ou edite um relatório de uma consulta."""
     consulta = get_object_or_404(Consulta, id=consulta_id, medico=request.user)
 
     if request.method == 'POST':
@@ -222,10 +299,6 @@ def escrever_relatorio(request, consulta_id):
 
 @login_required
 def dashboard_admin(request):
-    """
-    Dashboard administrativo principal - redireciona para a página de estatísticas.
-    Apenas usuários staff/admin podem acessar.
-    """
     if not request.user.is_staff:
         return redirect('painel')
     
@@ -233,7 +306,6 @@ def dashboard_admin(request):
 
 @login_required
 def dashboard_produtos(request):
-    """Lista todos os medicamentos cadastrados para edição."""
     if not request.user.is_staff:
         return redirect('painel')
     
@@ -242,25 +314,21 @@ def dashboard_produtos(request):
 
 @login_required
 def dashboard_consultas(request):
-    """Dashboard com estatísticas de consultas."""
     if not request.user.is_staff:
         return redirect('painel')
     
     from django.db.models import Count, Q
     from datetime import date
     
-    # Estatísticas
     total_consultas = Consulta.objects.count()
     consultas_realizadas = Consulta.objects.filter(status='concluida').count()
     consultas_agendadas = Consulta.objects.filter(status='agendada').count()
     consultas_canceladas = Consulta.objects.filter(status='cancelada').count()
     
-    # Máximo de atendimentos por dia (consultas agendadas para hoje)
     max_atendimentos_dia = Consulta.objects.filter(
         data_hora__date=date.today()
     ).count()
     
-    # Profissional mais ocupado (médico com mais consultas agendadas)
     medico_mais_ocupado = Consulta.objects.filter(
         status='agendada'
     ).values(
@@ -286,7 +354,6 @@ def dashboard_consultas(request):
 
 @login_required
 def dashboard_ocupacao(request):
-    """Lista todas as consultas agendadas."""
     if not request.user.is_staff:
         return redirect('painel')
     
@@ -295,7 +362,6 @@ def dashboard_ocupacao(request):
 
 @login_required
 def dashboard_pacientes(request):
-    """Lista todos os pacientes cadastrados."""
     if not request.user.is_staff:
         return redirect('painel')
     
@@ -304,23 +370,15 @@ def dashboard_pacientes(request):
 
 @login_required
 def dashboard_medicos(request):
-    """Lista todos os médicos cadastrados."""
     if not request.user.is_staff:
         return redirect('painel')
     
     medicos = User.objects.filter(perfil__tipo_usuario='medico').order_by('first_name')
     return render(request, 'pessoas/dashboard_medicos.html', {'medicos': medicos})
 
-# --- AÇÕES DO DASHBOARD ---
-
 @login_required
 def editar_medicamento(request, medicamento_id):
-    """Edita um medicamento existente."""
-    if not request.user.is_staff:
-        return redirect('painel')
-    
     medicamento = get_object_or_404(Medicamento, pk=medicamento_id)
-    
     if request.method == 'POST':
         form = MedicamentoForm(request.POST, request.FILES, instance=medicamento)
         if form.is_valid():
@@ -328,15 +386,12 @@ def editar_medicamento(request, medicamento_id):
             return redirect('dashboard_produtos')
     else:
         form = MedicamentoForm(instance=medicamento)
-    
-    return render(request, 'pessoas/editar_medicamento.html', {'form': form, 'medicamento': medicamento})
+    return render(request, 'pessoas/editar_medicamento.html', {'form': form})
 
 @login_required
 def cancelar_consulta_admin(request, consulta_id):
-    """Cancela uma consulta (ação do admin)."""
     if not request.user.is_staff:
         return redirect('painel')
-    
     consulta = get_object_or_404(Consulta, pk=consulta_id)
     consulta.status = 'cancelada'
     consulta.save()
@@ -344,57 +399,33 @@ def cancelar_consulta_admin(request, consulta_id):
 
 @login_required
 def remover_medico(request, medico_id):
-    """Remove um médico do sistema."""
     if not request.user.is_staff:
         return redirect('painel')
-    
     medico = get_object_or_404(User, pk=medico_id, perfil__tipo_usuario='medico')
-    if request.method == 'POST':
-        medico.delete()
+    medico.delete()
     return redirect('dashboard_medicos')
 
 @login_required
 def remover_paciente(request, paciente_id):
-    """Remove um paciente do sistema."""
     if not request.user.is_staff:
         return redirect('painel')
-    
     paciente = get_object_or_404(User, pk=paciente_id, perfil__tipo_usuario='paciente')
-    if request.method == 'POST':
-        paciente.delete()
+    paciente.delete()
     return redirect('dashboard_pacientes')
-
 
 @login_required
 def gerenciar_cargos(request, user_id):
-    """Permite ao admin alterar o cargo (tipo_usuario) de um usuário."""
     if not request.user.is_staff:
         return redirect('painel')
-    
     usuario = get_object_or_404(User, pk=user_id)
-    
-    try:
-        perfil = usuario.perfil
-    except Perfil.DoesNotExist:
-        # Se o usuário não tiver perfil, cria um perfil padrão (paciente)
-        perfil = Perfil.objects.create(usuario=usuario, tipo_usuario='paciente')
-
     if request.method == 'POST':
-        novo_cargo = request.POST.get('novo_cargo')
-        if novo_cargo in dict(Perfil.TIPOS_USUARIO):
-            perfil.tipo_usuario = novo_cargo
+        tipo_usuario = request.POST.get('tipo_usuario')
+        if tipo_usuario in ['medico', 'paciente', 'atendente']:
+            perfil, created = Perfil.objects.get_or_create(usuario=usuario)
+            perfil.tipo_usuario = tipo_usuario
             perfil.save()
-            # Redireciona para a lista de pacientes ou médicos dependendo do novo cargo
-            if novo_cargo == 'medico':
-                return redirect('dashboard_medicos')
-            elif novo_cargo == 'paciente':
-                return redirect('dashboard_pacientes')
-            else:
-                return redirect('dashboard_admin')
-        
-    contexto = {
-        'usuario': usuario,
-        'perfil': perfil,
-        'cargos': Perfil.TIPOS_USUARIO,
-    }
-    return render(request, 'pessoas/gerenciar_cargos.html', contexto)
+            return redirect('dashboard_pacientes')
+    return render(request, 'pessoas/gerenciar_cargos.html', {'usuario': usuario})
+
+def consulta_rapida(request):
+    return render(request, 'pessoas/consulta_rapida.html')
