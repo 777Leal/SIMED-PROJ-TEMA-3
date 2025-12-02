@@ -26,11 +26,17 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 # In production, this should be restricted to your specific domain
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
-# CSRF trusted origins for Replit
+# CSRF trusted origins for Replit and Railway
 CSRF_TRUSTED_ORIGINS = [
     'https://*.replit.dev',
     'https://*.repl.co',
+    'https://*.railway.app',
+    'https://*.up.railway.app',
 ]
+
+# Add custom domain from environment if available
+if os.environ.get('RAILWAY_PUBLIC_DOMAIN'):
+    CSRF_TRUSTED_ORIGINS.append(f"https://{os.environ.get('RAILWAY_PUBLIC_DOMAIN')}")
 
 # Application definition
 INSTALLED_APPS = [

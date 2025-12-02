@@ -29,6 +29,17 @@ This is a Django-based medical consultation system that allows patients to sched
 - ✅ Created database initialization script (scripts/init_db.py)
 - ✅ Added success messages with Django messages framework for smooth transitions
 
+### Latest Updates (December 2, 2025)
+- ✅ Migrated to PostgreSQL database (Replit Database)
+- ✅ Applied all 40 database migrations successfully
+- ✅ Fixed Swiper carousel loading order for certificates section
+- ✅ Adjusted map size on "Nos Encontre" page (reduced proportions)
+- ✅ Added Railway deployment configuration (Procfile, railway.json, runtime.txt)
+- ✅ Added CSRF trusted origins for Railway deployment
+- ✅ Created comprehensive README.md with installation guide
+- ✅ Created SQL script for database creation (scripts/create_database.sql)
+- ✅ Updated Google OAuth documentation
+
 ## Project Architecture
 
 ### Apps

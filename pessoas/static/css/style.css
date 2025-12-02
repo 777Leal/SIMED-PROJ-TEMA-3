@@ -1356,8 +1356,8 @@ body {
 .info-block p { font-size: 14px; color: #ecf0f1; margin-bottom: 4px; line-height: 1.6; }
 .info-block strong { color: #ffffff; font-weight: 600; }
 .footer-text { font-size: 13px; color: #a8b4ba; margin-top: 35px; line-height: 1.8; text-align: justify; }
-.map-section { flex: 1; min-width: 300px; }
-.map-container { position: relative; width: 100%; padding-top: 100%; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); border-radius: 8px; overflow: hidden; }
+.map-section { flex: 1; min-width: 250px; max-width: 450px; }
+.map-container { position: relative; width: 100%; padding-top: 75%; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); border-radius: 8px; overflow: hidden; }
 .map-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
 
 .site-footer {
