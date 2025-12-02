@@ -39,6 +39,11 @@ This is a Django-based medical consultation system that allows patients to sched
 - ✅ Created comprehensive README.md with installation guide
 - ✅ Created SQL script for database creation (scripts/create_database.sql)
 - ✅ Updated Google OAuth documentation
+- ✅ Implemented role-based permission system with hierarchy (Admin > Médico > Atendente > Paciente)
+- ✅ Created permission decorators (admin_required, medico_required, atendente_required, paciente_required)
+- ✅ Modernized scheduling/agenda page with interactive calendar and time slots
+- ✅ Fixed JavaScript calendar null element errors with proper DOM checks
+- ✅ Updated Bootstrap to version 5.3.3 with correct integrity hashes
 
 ## Project Architecture
 
