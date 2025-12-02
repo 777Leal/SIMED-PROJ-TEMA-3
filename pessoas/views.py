@@ -254,28 +254,21 @@ def painel_medico(request):
 @login_required
 def painel_paciente(request):
     consultas = Consulta.objects.filter(paciente=request.user).order_by('data_hora')
-    perfil = request.user.perfil
 
     if request.method == 'POST':
         form = AgendarConsultaForm(request.POST)
-        perfil_form = PerfilForm(request.POST, instance=perfil)
-        if form.is_valid() and perfil_form.is_valid():
+        if form.is_valid():
             nova_consulta = form.save(commit=False)
             nova_consulta.paciente = request.user
             nova_consulta.data_hora = form.cleaned_data.get('data_hora')
             nova_consulta.save()
-            perfil_form.save()
             return redirect('painel_paciente')
     else:
         form = AgendarConsultaForm()
-        perfil_form = PerfilForm(instance=perfil)
-
-    # A lógica de preenchimento de choices foi movida para o forms.py
 
     return render(request, 'pessoas/painel_paciente.html', {
         'consultas': consultas,
-        'form': form,
-        'perfil_form': perfil_form
+        'form': form
     })
 
 @login_required

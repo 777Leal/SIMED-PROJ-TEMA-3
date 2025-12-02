@@ -2,7 +2,14 @@
 
 {% load static %}
 
-{% block title %}Início{% endblock %}
+{% block title %}Sobre{% endblock %}
+
+{% block extra_css %}
+<!-- Swiper CSS para carrossel de certificados -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+<!-- AOS para animações de entrada -->
+<link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
 
@@ -117,12 +124,6 @@
 
     </div>
     </section>
-
-<!-- Swiper CSS - deve ser carregado ANTES do JS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
-
-<!-- AOS para animações de entrada -->
-<link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
 
 <!-- Swiper JS -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
